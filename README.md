@@ -2,17 +2,22 @@
 
 Automatically arrange your Scala imports as they are described in Inkling's Scala coding style guide (with some exceptions)!
 
-e.g.
+# To Use
+
+Copy the .py file to ~/Library/Application Support/Sublime Text 2/Packages/User/organize_scala_imports.py. From the Sublime GUI you can quickly access this folder by hitting cmd+shift+P and searching for `Preferences: Browse Packages`.
+
+Hit cmd+shift+P and open `Preferences: Key Bindings - User`.
+
+Find a suitable key binding for the command (e.g. ctrl+\\\\) and apply it to the keymap as follows:
 ```
-import java.io.{
-  AThingThatShouldGoFirst,
-  FileNotFoundException,
-  HolySnap,
-  AhIThinkThisWillMakeTheImportTooLong,
-  File,
-  Weird
-}
+[
+	{ "keys": ["ctrl+\\"], "command": "organize_scala_imports"}
+]
 ```
+
+Or if you want to execute from a console,
+ctrl+\` for python console, then
+`view.run_command("organize_scala_imports")` to execute.
 
 # Caveats and Known Failing Cases
 
@@ -61,20 +66,3 @@ class ClassThing {
 	}
 }
 ```
-
-# To Use
-
-Copy the .py file to ~/Library/Application Support/Sublime Text 2/Packages/User/organize_scala_imports.py. From the Sublime GUI you can quickly access this folder by hitting cmd+shift+P and searching for `Preferences: Browse Packages`.
-
-Hit cmd+shift+P and open `Preferences: Key Bindings - User`.
-
-Find a suitable key binding for the command (e.g. ctrl+\\\\) and apply it to the keymap as follows:
-```
-[
-	{ "keys": ["ctrl+\\"], "command": "organize_scala_imports"}
-]
-```
-
-Or if you want to execute from a console,
-ctrl+` for python console, then
-`view.run_command("organize_scala_imports")` to execute.
