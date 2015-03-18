@@ -19,25 +19,37 @@ def getValues( blob ):
 
 def addSourceToStanza( imports, source, index ):
 	parts = re.search(r'(.*)\.(.*)', source)
-	key, value = parts.group(1), getValues(parts.group(2))
+	key = parts.group(1)
+	value = getValues(source[len(key) + 1:])
 	add(imports[index], key, value)
+
+def grabBracketItems( region, self ):
+	if self.view.substr(region).strip().endswith("{"):
+		return sublime.Region(region.a, (self.view.find(r'\}', region.a)).b)
+	else:
+		return region
 
 class OrganizeScalaImportsCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		content = self.view.substr(sublime.Region(0, self.view.size()))
 		import_regions = self.view.find_all(r'^\s*import .*$')
+		new_regions = []
+		for region in import_regions:
+			new_regions.append(grabBracketItems(region, self))
 
-		if len(import_regions) == 0:
+		if len(new_regions) == 0:
 			return
 		else:
 			try:
 				edit_obj = self.view.begin_edit("OrganizeScalaImports")
 
-				cursor = import_regions[0].begin()
+				cursor = new_regions[0].begin()
 				imports = [{}, {}, {}]
 
-				for region in import_regions:
-					source = re.search(r'^\s*import (.*)$', self.view.substr(region)).group(1)
+				for region in new_regions:
+					source = re.search(r'^\s*import (.*)', self.view.substr(region)).group(1)
+					if (source.endswith("{")):
+						source = self.view.substr(sublime.Region(region.a + len("import "), region.b))
 
 					if source.startswith("java.") or source.startswith("scala."):
 						addSourceToStanza(imports, source, 0)
@@ -48,13 +60,12 @@ class OrganizeScalaImportsCommand(sublime_plugin.TextCommand):
 
 				# Delete existing import statements.
 				offset = 0
-				for region in import_regions:
+				for region in new_regions:
 					self.view.erase(edit_obj, sublime.Region(region.b - offset, region.a - offset))
 					offset += (region.b - region.a)
 
 				# Write new import statements.
 				for i in range(0, 3):
-					print(sorted(imports[i]))
 					for key in sorted(imports[i]):
 						import_list = imports[i][key]
 
@@ -85,8 +96,6 @@ class OrganizeScalaImportsCommand(sublime_plugin.TextCommand):
 							cursor += len(key) + len(import_list[0]) + len("import .") + 1
 					self.view.insert(edit_obj, cursor, "")
 					cursor += 1
-
-				# print(imports)
 
 			finally:
 				self.view.end_edit(edit_obj)
