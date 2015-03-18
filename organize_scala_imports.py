@@ -11,9 +11,9 @@ def applyStrip( str ):
 	return str.strip()
 
 def getValues( blob ):
-	match = re.search(r'{(.*)}', blob)
+	match = re.search(r'{(.*)}', blob, re.DOTALL)
 	if match:
-		return map(applyStrip, match.group(1).split(","))
+		return map(applyStrip, "".join(match.group(1).split()).split(","))
 	else:
 		return [blob]
 
@@ -65,6 +65,9 @@ class OrganizeScalaImportsCommand(sublime_plugin.TextCommand):
 					offset += (region.b - region.a)
 
 				# Write new import statements.
+				self.view.insert(edit_obj, cursor, "")
+				cursor += 1
+
 				for i in range(0, 3):
 					for key in sorted(imports[i]):
 						import_list = imports[i][key]
@@ -91,9 +94,10 @@ class OrganizeScalaImportsCommand(sublime_plugin.TextCommand):
 							cursor += len(end_piece)
 
 						else:
-							import_piece = "import " + key + "." + import_list[0]
+							import_piece = "import " + key + "." + import_list[0] + "\n"
 							self.view.insert(edit_obj, cursor, import_piece)
-							cursor += len(key) + len(import_list[0]) + len("import .") + 1
+							cursor += len(import_piece)
+
 					self.view.insert(edit_obj, cursor, "")
 					cursor += 1
 
